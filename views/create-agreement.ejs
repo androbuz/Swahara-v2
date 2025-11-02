@@ -1,0 +1,124 @@
+<% 
+  const activePage = 'create';
+  const title = 'Create Agreement - Swahara';
+%>
+
+<%- include('web-layout', { body: createAgreementContent(), currentUser, activePage, title }) %>
+
+<%
+function createAgreementContent() {
+  return `
+    <div>
+      <div class="mb-8">
+        <h1 class="mb-2">Create New Agreement</h1>
+        <p class="text-gray-600">Fill in the details to create a new agreement</p>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 max-w-3xl">
+        <form action="/create-agreement" method="POST" class="space-y-6">
+          <!-- Party Information -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="partyName" class="text-sm text-gray-700 mb-2 block font-medium">
+                Party Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="partyName"
+                name="partyName"
+                placeholder="e.g., Nakato Grace"
+                required
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <p class="text-xs text-gray-500 mt-1">Enter the full name of the other party</p>
+            </div>
+
+            <div>
+              <label for="partyPhone" class="text-sm text-gray-700 mb-2 block font-medium">
+                Party Phone Number <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="partyPhone"
+                name="partyPhone"
+                placeholder="+256 xxx xxxxxx"
+                required
+                pattern="\\+256\\s?\\d{3}\\s?\\d{6}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <p class="text-xs text-gray-500 mt-1">Format: +256 xxx xxxxxx</p>
+            </div>
+          </div>
+
+          <!-- Agreement Title -->
+          <div>
+            <label for="title" class="text-sm text-gray-700 mb-2 block font-medium">
+              Agreement Title <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              placeholder="e.g., Boda Boda Purchase"
+              required
+              class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label for="description" class="text-sm text-gray-700 mb-2 block font-medium">
+              Description <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Describe the agreement details, terms, and conditions..."
+              required
+              rows="5"
+              class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Amount and Due Date -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="amount" class="text-sm text-gray-700 mb-2 block font-medium">Amount (Optional)</label>
+              <input
+                type="text"
+                id="amount"
+                name="amount"
+                placeholder="e.g., UGX 500,000"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+            </div>
+
+            <div>
+              <label for="dueDate" class="text-sm text-gray-700 mb-2 block font-medium">Due Date (Optional)</label>
+              <input
+                type="date"
+                id="dueDate"
+                name="dueDate"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex gap-4 pt-4">
+            <a href="/dashboard" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl py-6 transition-colors text-center font-medium">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 transition-colors font-medium"
+            >
+              Create Agreement
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+%>

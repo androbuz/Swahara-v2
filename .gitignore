@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Database
+data/
+*.db
+*.db-journal
+
+# Uploads
+uploads/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db

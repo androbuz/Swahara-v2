@@ -1,0 +1,126 @@
+<% 
+  const isPending = agreement.status === 'pending';
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agreement Details - Swahara</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    h2 { font-size: 1.5rem; font-weight: 600; line-height: 2rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.75rem; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8">
+    <div class="max-w-3xl mx-auto">
+      <a href="/dashboard" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        <span>Back to Dashboard</span>
+      </a>
+
+      <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+        <h2 class="mb-6">Agreement Details</h2>
+
+        <!-- Party Info Card -->
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-8 text-white shadow-lg mb-8">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30 shadow-lg">
+                <span class="text-3xl font-bold"><%= agreement.otherPartyName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) %></span>
+              </div>
+              <div>
+                <h3 class="text-xl font-medium mb-1"><%= agreement.otherPartyName %></h3>
+                <p class="text-blue-100"><%= agreement.otherPartyPhone %></p>
+              </div>
+            </div>
+            <% if (isPending) { %>
+              <div class="bg-yellow-400/90 text-yellow-900 px-4 py-2 rounded-full text-sm font-medium">
+                Pending
+              </div>
+            <% } else if (agreement.status === 'cancelled') { %>
+              <div class="bg-red-400/90 text-red-900 px-4 py-2 rounded-full text-sm font-medium">
+                Cancelled
+              </div>
+            <% } else { %>
+              <div class="bg-green-400/90 text-green-900 px-4 py-2 rounded-full text-sm font-medium">
+                Active
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Agreement Details -->
+        <div class="space-y-6 mb-8">
+          <div>
+            <h3 class="text-sm text-gray-500 mb-2">Agreement Title</h3>
+            <p class="text-lg font-medium"><%= agreement.title %></p>
+          </div>
+
+          <div>
+            <h3 class="text-sm text-gray-500 mb-2">Description</h3>
+            <p class="text-gray-700 leading-relaxed"><%= agreement.description %></p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6">
+            <% if (agreement.amount) { %>
+              <div>
+                <h3 class="text-sm text-gray-500 mb-2">Amount</h3>
+                <p class="text-lg font-medium text-blue-600"><%= agreement.amount %></p>
+              </div>
+            <% } %>
+
+            <% if (agreement.dueDate) { %>
+              <div>
+                <h3 class="text-sm text-gray-500 mb-2">Due Date</h3>
+                <div class="flex items-center gap-2 text-gray-700">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <span><%= new Date(agreement.dueDate).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                </div>
+              </div>
+            <% } %>
+          </div>
+
+          <div>
+            <h3 class="text-sm text-gray-500 mb-2">Created Date</h3>
+            <p class="text-gray-700">
+              <%= new Date(agreement.createdDate).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons for Pending Requests -->
+        <% if (isPending) { %>
+          <div class="flex gap-4 pt-6 border-t border-gray-200">
+            <form action="/agreements/<%= agreement.id %>/reject" method="POST" class="flex-1">
+              <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white rounded-xl py-6 transition-colors flex items-center justify-center gap-2 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Reject Agreement
+              </button>
+            </form>
+            <form action="/agreements/<%= agreement.id %>/accept" method="POST" class="flex-1">
+              <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white rounded-xl py-6 transition-colors flex items-center justify-center gap-2 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Accept Agreement
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

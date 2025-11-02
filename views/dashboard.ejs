@@ -1,0 +1,227 @@
+<% 
+  const activePage = 'dashboard';
+  const title = 'Dashboard - Swahara';
+  
+  // Format currency for display
+  function formatCurrency(amount) {
+    return 'UGX ' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+%>
+
+<%- include('web-layout', { body: dashboardContent(), currentUser, activePage, title }) %>
+
+<%
+function dashboardContent() {
+  return `
+    <div class="space-y-8">
+      ${message ? `
+        <div class="bg-blue-100 border border-blue-200 text-blue-800 px-6 py-4 rounded-2xl">
+          ${message}
+        </div>
+      ` : ''}
+
+      <!-- Header -->
+      <div>
+        <h1 class="mb-2">Dashboard</h1>
+        <p class="text-gray-600">Manage your agreements and track your earnings</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-4 gap-6">
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm text-gray-600">Active Agreements</h3>
+          </div>
+          <p class="text-3xl font-semibold text-blue-600">${stats.statusCounts.active}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm text-gray-600">Pending Requests</h3>
+          </div>
+          <p class="text-3xl font-semibold text-orange-600">${stats.statusCounts.pending}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm text-gray-600">Cancelled</h3>
+          </div>
+          <p class="text-3xl font-semibold text-red-600">${stats.statusCounts.cancelled}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm text-gray-600">Total Earned</h3>
+          </div>
+          <p class="text-2xl font-semibold text-green-600">${formatCurrency(stats.totalEarned)}</p>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-2 gap-6">
+        <!-- Agreement Status Pie Chart -->
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+          <h2 class="mb-4">Agreement Status</h2>
+          <canvas id="statusChart" height="200"></canvas>
+        </div>
+
+        <!-- Monthly Earnings Bar Chart -->
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+          <h2 class="mb-4">Monthly Earnings</h2>
+          <canvas id="earningsChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- My Agreements -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+        <h2 class="mb-6">My Active Agreements</h2>
+        ${myAgreements.length === 0 ? `
+          <div class="text-center py-12 text-gray-400">
+            <p>No active agreements yet</p>
+          </div>
+        ` : `
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            ${myAgreements.map(agreement => {
+              return `
+                <a href="/agreements/${agreement.id}" class="block">
+                  <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl hover:shadow-xl transition-all hover:scale-105 flex flex-col items-center justify-center p-6 text-white shadow-lg cursor-pointer">
+                    <div class="w-16 h-16 rounded-full bg-white/20 mb-3 flex items-center justify-center border-2 border-white/50 shadow-md">
+                      <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                    <span class="text-sm text-center line-clamp-2 font-medium mb-2">${agreement.title}</span>
+                    <span class="text-xs text-blue-100">${agreement.otherPartyName}</span>
+                  </div>
+                </a>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
+
+      <!-- Pending Agreements -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+        <h2 class="mb-6">Pending Requests</h2>
+        ${pendingAgreements.length === 0 ? `
+          <div class="text-center py-12 text-gray-400">
+            <p>No pending requests</p>
+          </div>
+        ` : `
+          <div class="space-y-4">
+            ${pendingAgreements.map(agreement => {
+              return `
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 border border-blue-200">
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                      <h4 class="mb-1 font-medium">${agreement.title}</h4>
+                      <p class="text-sm text-blue-700">
+                        From: <span class="font-medium">${agreement.otherPartyName}</span>
+                      </p>
+                    </div>
+                    ${agreement.amount ? `
+                      <span class="font-medium text-blue-800 bg-white/60 px-4 py-2 rounded-xl whitespace-nowrap ml-4">${agreement.amount}</span>
+                    ` : ''}
+                  </div>
+                  <div class="flex items-center justify-end gap-3">
+                    <form action="/agreements/${agreement.id}/reject" method="POST" class="inline">
+                      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl transition-all hover:scale-105 shadow-md flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Reject</span>
+                      </button>
+                    </form>
+                    <form action="/agreements/${agreement.id}/accept" method="POST" class="inline">
+                      <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2.5 rounded-xl transition-all hover:scale-105 shadow-md flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Accept</span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
+    </div>
+
+    <!-- Charts Scripts -->
+    <script>
+      // Status Pie Chart
+      const statusCtx = document.getElementById('statusChart').getContext('2d');
+      new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Active', 'Pending', 'Cancelled'],
+          datasets: [{
+            data: [${stats.statusCounts.active}, ${stats.statusCounts.pending}, ${stats.statusCounts.cancelled}],
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.8)',
+              'rgba(251, 146, 60, 0.8)',
+              'rgba(239, 68, 68, 0.8)'
+            ],
+            borderColor: [
+              'rgb(59, 130, 246)',
+              'rgb(251, 146, 60)',
+              'rgb(239, 68, 68)'
+            ],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 15,
+                font: {
+                  size: 12
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Monthly Earnings Bar Chart
+      const earningsCtx = document.getElementById('earningsChart').getContext('2d');
+      new Chart(earningsCtx, {
+        type: 'bar',
+        data: {
+          labels: [${stats.monthlyEarnings.map(m => `'${m.month}'`).join(', ')}],
+          datasets: [{
+            label: 'Earnings (UGX)',
+            data: [${stats.monthlyEarnings.map(m => m.total).join(', ')}],
+            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+            borderColor: 'rgb(34, 197, 94)',
+            borderWidth: 2,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return 'UGX ' + value.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');
+                }
+              }
+            }
+          }
+        }
+      });
+    </script>
+  `;
+}
+%>
