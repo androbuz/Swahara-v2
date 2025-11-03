@@ -22,10 +22,10 @@ class Agreement {
     return rows.map(row => new Agreement(row));
   }
 
-  static async getPendingAgreements(currentUserId) {
+  static async getPendingAgreements(currentUserPhone) {
     const rows = await database.all(
-      'SELECT * FROM agreements WHERE status = ? ORDER BY created_date DESC',
-      ['pending']
+      'SELECT * FROM agreements WHERE status = ? AND other_party_phone = ? ORDER BY created_date DESC',
+      ['pending', currentUserPhone]
     );
     return rows.map(row => new Agreement(row));
   }
@@ -45,6 +45,9 @@ class Agreement {
   }
 
   static async create(data) {
+    // removing the phone code symbol '+ 
+    data.otherPartyPhone = data.otherPartyPhone.replace('+', '');
+    
     const result = await database.run(
       `INSERT INTO agreements 
        (title, description, other_party_name, other_party_phone, created_by_id, amount, due_date, status, created_date) 
@@ -80,7 +83,7 @@ class Agreement {
     return await Agreement.findById(agreementId);
   }
 
-  static async getStats(currentUserId) {
+  static async getStats(currentUserId, currentUserPhone) {
     // Get total earned (sum of active agreements)
     const earnedRow = await database.get(
       `SELECT SUM(CAST(REPLACE(REPLACE(amount, 'UGX ', ''), ',', '') AS INTEGER)) as total
@@ -93,9 +96,9 @@ class Agreement {
     const statusRows = await database.all(
       `SELECT status, COUNT(*) as count 
        FROM agreements 
-       WHERE created_by_id = ?
+       WHERE created_by_id = ? OR other_party_phone = ?
        GROUP BY status`,
-      [currentUserId]
+      [currentUserId, currentUserPhone]
     );
 
     const statusCounts = {

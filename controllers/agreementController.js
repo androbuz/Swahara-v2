@@ -9,8 +9,8 @@ class AgreementController {
       const currentUser = await User.getCurrentUser(req.session.user.id);
       
       const myAgreements = await Agreement.getMyActiveAgreements(currentUser.id);
-      const pendingAgreements = await Agreement.getPendingAgreements(currentUser.id);
-      const stats = await Agreement.getStats(currentUser.id);
+      const pendingAgreements = await Agreement.getPendingAgreements(currentUser.phone);
+      const stats = await Agreement.getStats(currentUser.id, currentUser.phone);
 
       res.render('dashboard', {
         currentUser,
@@ -117,7 +117,7 @@ class AgreementController {
         createdById: currentUser.id,
         amount,
         dueDate,
-        status: 'active'
+        status: 'pending'
       });
 
       res.redirect('/dashboard?message=Agreement created successfully!');
