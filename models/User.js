@@ -54,6 +54,28 @@ class User {
     return new User(result.id, name, phone, avatar, initials, hashedPassword);
   }
 
+  async validatePassword(plainPassword) {
+    return await bcrypt.compare(plainPassword, this.password);
+  }
+
+  static async create(name, phone, password, avatar = null, initials = null) {
+    // Generate initials if not provided
+    if (!initials) {
+      const nameParts = name.split(' ');
+      initials = nameParts.map(part => part[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result = await database.run(
+      'INSERT INTO users (name, phone, password, avatar, initials) VALUES (?, ?, ?, ?, ?)',
+      [name, phone, hashedPassword, avatar, initials]
+    );
+
+    return new User(result.lastID, name, phone, avatar, initials, hashedPassword);
+  }
+
   static async getAllUsers() {
     const rows = await database.all('SELECT * FROM users ORDER BY name');
     return rows.map(row => 
