@@ -47,6 +47,8 @@ class Agreement {
   static async create(data) {
     // removing the phone code symbol '+ 
     data.otherPartyPhone = data.otherPartyPhone.replace('+', '');
+    // trim whitespace
+    data.otherPartyPhone = data.otherPartyPhone.trim();
     
     const result = await database.run(
       `INSERT INTO agreements 
@@ -114,14 +116,14 @@ class Agreement {
     // Get monthly earnings (last 6 months)
     const monthlyRows = await database.all(
       `SELECT 
-         strftime('%Y-%m', created_date) as month,
+         strftime('%Y-%m', due_date) as month,
          SUM(CAST(REPLACE(REPLACE(amount, 'UGX ', ''), ',', '') AS INTEGER)) as total
        FROM agreements 
        WHERE created_by_id = ? 
          AND status = 'active' 
          AND amount IS NOT NULL 
          AND amount LIKE 'UGX%'
-         AND created_date >= date('now', '-6 months')
+         AND due_date >= date('now', '-6 months')
        GROUP BY month
        ORDER BY month`,
       [currentUserId]

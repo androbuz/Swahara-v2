@@ -61,7 +61,7 @@ class AuthController {
   async login(req, res) {
     try {
       const { phone, password } = req.body;
-
+    
       // Find user by phone number
       const user = await User.findByPhone(phone);
       
