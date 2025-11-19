@@ -48,7 +48,9 @@
             type="tel" 
             id="phone" 
             name="phone" 
-            placeholder="+256 xxx xxxxxx" 
+            placeholder="256 xxx xxxxxx"
+            required
+            pattern="^\256\s?\d{3}\s?\d{6}$" 
             required
             class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
